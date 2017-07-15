@@ -1,18 +1,15 @@
-from dp4gp import datasets
 from dp4gp import dp4gp
-from dp4gp.utils import dp_normalise, dp_unnormalise
 import random
 import numpy as np
 import GPy
 import matplotlib.pyplot as plt
-from dp4gp import histogram
-import pandas as pd
+#from dp4gp import histogram
 from dask_searchcv import GridSearchCV
 #from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import cross_val_score # http://scikit-learn.org/stable/developers/contributing.html#estimators
 from sklearn.base import BaseEstimator
-from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.cluster import KMeans
+import os
+import distributed
 
 """
 Usage recommendation:
@@ -23,6 +20,24 @@ getprobabilities returns a matrix, using the same k-folds and parameters of pick
 if you're just interested in the score for a given parameter combination then
 call getscores with just one value of parameters, or maybe just vary epsilon?
 """
+
+
+def install_libraries_on_workers():
+    """Install libraries if necessary on workers etc."""
+    from dask.distributed import Client
+    client = Client('127.0.0.1:8786')
+    
+
+    runlist = ['pip install -U pip','sudo apt install libgl1-mesa-glx -y','conda update scipy -y','pip install git+https://github.com/sods/paramz.git','pip install git+https://github.com/SheffieldML/GPy.git','pip install git+https://github.com/lionfish0/dp4gp.git','conda install dask-searchcv -c conda-forge -y']
+
+    for item in runlist:
+        print("Installing '%s' on workers..." % item)
+        client.run(os.system,item)
+        print("Installing '%s' on scheduler..." % item)
+        client.run_on_scheduler(os.system,item)    
+        #os.system(item) #if you need to install it locally too
+        
+        
 
 # This is an estimator for sklearn
 class DPCloaking(BaseEstimator):
