@@ -109,8 +109,7 @@ class DPCloaking(BaseEstimator):
         return ypred
     
     def score(self, X, y=None):
-        """
-        score(X,y=None)
+        """score(X,y=None)
         
         Return the (truncated) negative SSE or part of the sensitivity of the SSE
         
@@ -128,8 +127,8 @@ class DPCloaking(BaseEstimator):
             used later in the cross-validation procedure. The truncation
             will therefore not cause an underestimate in the final score.
             The truncation allows us to put a bound on the sensitivity of
-            the SSE.
-        """        
+            the SSE. """        
+
         if self.getxvalfoldsensitivities:          
             C = self.dpgp.get_C(X) #NumTest x NumTrain
             #we sum over the square of this (times the sensitivity) to get,
@@ -145,9 +144,8 @@ class DPCloaking(BaseEstimator):
             errors[errors<-self.errorlimit] = -self.errorlimit
             return -np.sum((y-self.predict(X))**2)
 
-def getprobabilities(X,y,p_grid, cv):
-    """
-    getprobabilities(X,y,p_grid, cv)
+def getprobabilities(X,y,p_grid, cv, ac_sens):
+    """getprobabilities(X,y,p_grid, cv, ac_sens)
     
     - X and y: Inputs and outputs
     - p_grid: grid of parameters to search over
@@ -193,7 +191,7 @@ def getprobabilities(X,y,p_grid, cv):
     
     return param_probabilities
 
-def getscores(X,y,p_grid,cv):
+def getscores(X,y,p_grid,cv,ac_sens):
     """
     Compute the negative RMSE of each of the fold/param combos
     """
