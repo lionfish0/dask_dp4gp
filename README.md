@@ -13,6 +13,4 @@ Step 3: On the scheduler, we're going to awkwardly install this repo twice, once
 
 ```git clone https://github.com/lionfish0/dask_dp4gp.git```
 
-```pip install git+https://github.com/lionfish0/dask_dp4gp.git```
-
 Once done visit the jupyter notebooks for further instructions.
