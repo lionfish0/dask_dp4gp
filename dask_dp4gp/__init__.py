@@ -22,13 +22,17 @@ call getscores with just one value of parameters, or maybe just vary epsilon?
 """
 
 
-def install_libraries_on_workers():
-    """Install libraries if necessary on workers etc."""
+def install_libraries_on_workers(url):
+    """Install libraries if necessary on workers etc.
+    
+    e.g. if already on server...
+    install_libraries_on_workers('127.0.0.1:8786')
+    """
     from dask.distributed import Client
-    client = Client('127.0.0.1:8786')
+    client = Client(url)
     
 
-    runlist = ['pip install -U pip','sudo apt install libgl1-mesa-glx -y','conda update scipy -y','pip install git+https://github.com/sods/paramz.git','pip install git+https://github.com/SheffieldML/GPy.git','pip install git+https://github.com/lionfish0/dp4gp.git','conda install dask-searchcv -c conda-forge -y', 'pip install git+https://github.com/lionfish0/dask_dp4gp.git']
+    runlist = ['pip install -U pip','sudo apt install libgl1-mesa-glx -y','conda update scipy -y','pip install git+https://github.com/sods/paramz.git','pip install git+https://github.com/SheffieldML/GPy.git','pip install git+https://github.com/lionfish0/dp4gp.git','conda install dask-searchcv -c conda-forge -y', 'pip install git+https://github.com/lionfish0/dask_dp4gp.git', 'pip install numpy', 'conda remove argcomplete -y']#, 'conda install python=3.6 -y']
 
     for item in runlist:
         print("Installing '%s' on workers..." % item)
