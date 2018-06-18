@@ -10,6 +10,8 @@ from sklearn.base import BaseEstimator
 from sklearn.cluster import KMeans
 import os
 import distributed
+from dask.distributed import Client
+
 
 """
 Usage recommendation:
@@ -22,25 +24,45 @@ call getscores with just one value of parameters, or maybe just vary epsilon?
 """
 
 
+#def install_libraries_on_workers(url,runlist = None):
+#    """Install libraries if necessary on workers etc.
+#    
+#    e.g. if already on server...
+#    install_libraries_on_workers('127.0.0.1:8786')
+#    """
+#    from dask.distributed import Client
+#    client = Client(url)
+#    
+#    if runlist is None:
+#        runlist = ['pip install -U pip','sudo apt install libgl1-mesa-glx -y','conda update scipy -y','pip install git+https://github.com/sods/paramz.git','pip install git+https://github.com/SheffieldML/GPy.git','pip install git+https://github.com/lionfish0/dp4gp.git','conda install dask-searchcv -c conda-forge -y', 'pip install git+https://github.com/lionfish0/dask_dp4gp.git', 'pip install numpy', 'conda remove argcomplete -y']#, 'conda install python=3.6 -y']
+#
+#    for item in runlist:
+#        print("Installing '%s' on workers..." % item)
+#        client.run(os.system,item)
+#        print("Installing '%s' on scheduler..." % item)
+#        client.run_on_scheduler(os.system,item)    
+#        #os.system(item) #if you need to install it locally too
+        
+        
 def install_libraries_on_workers(url,runlist = None):
     """Install libraries if necessary on workers etc.
-    
     e.g. if already on server...
     install_libraries_on_workers('127.0.0.1:8786')
     """
-    from dask.distributed import Client
+    
     client = Client(url)
     
     if runlist is None:
-        runlist = ['pip install -U pip','sudo apt install libgl1-mesa-glx -y','conda update scipy -y','pip install git+https://github.com/sods/paramz.git','pip install git+https://github.com/SheffieldML/GPy.git','pip install git+https://github.com/lionfish0/dp4gp.git','conda install dask-searchcv -c conda-forge -y', 'pip install git+https://github.com/lionfish0/dask_dp4gp.git', 'pip install numpy', 'conda remove argcomplete -y']#, 'conda install python=3.6 -y']
+        runlist = ['sudo apt-get -y install build-essential','pip install -U pip','sudo apt install libgl1-mesa-glx -y','conda update scipy -y','pip install git+https://github.com/sods/paramz.git','pip install git+https://github.com/SheffieldML/GPy.git','pip install git+https://github.com/lionfish0/dp4gp.git','conda install dask-searchcv -c conda-forge -y', 'pip install git+https://github.com/lionfish0/dask_dp4gp.git', 'pip install numpy', 'conda remove argcomplete -y','pip install git+https://github.com/lionfish0/dialysis_analysis.git --upgrade']#, 'conda install python=3.6 -y']
 
     for item in runlist:
         print("Installing '%s' on workers..." % item)
-        client.run(os.system,item)
+        res = client.run(os.system,item)
+        print(res)
         print("Installing '%s' on scheduler..." % item)
-        client.run_on_scheduler(os.system,item)    
-        #os.system(item) #if you need to install it locally too
-        
+        res = client.run_on_scheduler(os.system,item)    
+        print(res)
+        #os.system(item) #if you need to install it locally too        
         
 
 # This is an estimator for sklearn
@@ -58,6 +80,8 @@ class DPCloaking(BaseEstimator):
         sensitivity=1.0 - the amount one output can change
         epsilon=1.0, delta=0.01 - DP parameters
         inducing = None - locations of inducing points, default to None - not using inducing points.
+                   alternatively specify a number as the number of inducing inputs (these will
+                   be placed using k-means clustering).
         getxvalfoldsensitivities=False - the score method will return the sum-squared-error
                 of each fold by default, but if this is set to true it will return the
                 sensitivity of the SSE caused by a perturbed point being in the training data. 
